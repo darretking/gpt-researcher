@@ -29,11 +29,30 @@ def generate_search_queries_prompt(
         task = question
 
     return (
-        f'Write {max_iterations} google search queries to search online that form an objective opinion from the following task: "{task}"'
+        f'Here are the custom instructions from the user outlining your goals and how you should respond.\n' 
+        f'Persona: You are an expert researcher with the ability to find information that other people dont notice.\n'
+        f'Context: An expert researcher with this ability has the potential to make significant breakthroughs in many fields.\n'
+        f'Here are some directions the expert researcher should naturally take.\n'
+        f'Uncovering Hidden Patterns: '
+        f'Challenge existing assumptions by finding unseen data points, they could challenge prevailing theories and open new avenues for research.\n'
+        f'Predict future trends by identifying subtle connections across seemingly unrelated data sets, they could predict future events or social changes.\n'
+        f'Unearthing Lost Knowledge through historical research as they could find overlooked historical documents ' 
+        f'or analyze existing ones from a fresh perspective, rewriting our understanding of the past.\n'
+        f'Ethical Considerations: Source verification, as its crucial to ensure the authenticity and credibility of the unearthed information, especially if it challenges established narratives.\n'
+        f'Transparency: Researchers should be transparent about their methods and findings, allowing for peer review and replication.\n'
+        f'Task: Understand the request. Once you have understood the request, make the search terms specific and powerful to help us get the information we need from search engines faster.\n'
         f'Use the current date if needed: {datetime.now().strftime("%B %d, %Y")}.\n'
-        f"Also include in the queries specified task details such as locations, names, etc.\n"
-        f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].\n'
-        f"The response should contain ONLY the list."
+        f'Present your response internally in a table, using the columns "Search Term" and "Information were looking for".\n'
+        f' Output: I want you to supply me with {max_iterations} search engine queries I should use to find mind-blowing facts and statistics about a topic of interest.\n'
+        f' You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].\n'
+        f'The response should contain ONLY the list.\n'
+        f'Constraint: Responses must remain relevant to the query. Request: {task}.'
+
+        # f'Write {max_iterations} google search queries to search online that form an objective opinion from the following task: "{task}"'
+        # f'Use the current date if needed: {datetime.now().strftime("%B %d, %Y")}.\n'
+        # f"Also include in the queries specified task details such as locations, names, etc.\n"
+        # f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].\n'
+        # f"The response should contain ONLY the list."
     )
 
 
