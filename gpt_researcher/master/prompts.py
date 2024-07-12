@@ -4,17 +4,46 @@ from datetime import date, datetime, timezone
 from gpt_researcher.utils.enum import ReportSource, ReportType, Tone
 
 
+def generate_problem_statement_prompt(query):
+    """Generates the probmlem statement from the reseach task.
+    Args: question (str): The question to generate the summary prompt for
+            text (str): The text to generate the summary prompt for
+    Returns: str: The summary prompt for the given question and text
+    """
+
+    return (
+        f'Request: "{query}".\n '
+        f"You will start by rewriting the request as a short problem statement."
+    )
+
+
+def generate_report_layout_prompt(query):
+    """Generates the probmlem statement from the reseach task.
+    Args: question (str): The question to generate the summary prompt for
+            text (str): The text to generate the summary prompt for
+    Returns: str: The summary prompt for the given question and text
+    """
+
+    return (
+        f'Topic: "{query}".\n '
+        f'Problem Statement: "{query}".\n '
+        f"Steps you need to complete:\n "
+        f"You will determine a format for the report you will write for the problem statement, it should be based on the topic - determine the sections and sub sections - the report layout should be business orientated. the report should be structured in a manner as to answers the topic and problem statement. do not cover topics not requested.\n "
+    )
+
 def generate_search_queries_prompt(
     question: str,
     parent_query: str,
     report_type: str,
-    max_iterations: int = 3,
+    problem_statement: str,
+    max_iterations: int = 7
 ):
     """Generates the search queries prompt for the given question.
     Args:
         question (str): The question to generate the search queries prompt for
         parent_query (str): The main question (only relevant for detailed reports)
         report_type (str): The report type
+        problem_statement (str): The problem statement
         max_iterations (int): The maximum number of search queries to generate
 
     Returns: str: The search queries prompt for the given question
@@ -43,16 +72,13 @@ def generate_search_queries_prompt(
         f'Task: Understand the request. Once you have understood the request, make the search terms specific and powerful to help us get the information we need from search engines faster.\n'
         f'Use the current date if needed: {datetime.now().strftime("%B %d, %Y")}.\n'
         f'Present your response internally in a table, using the columns "Search Term" and "Information were looking for".\n'
-        f' Output: I want you to supply me with {max_iterations} search engine queries I should use to find mind-blowing facts and statistics about a topic of interest.\n'
-        f' You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].\n'
-        f'The response should contain ONLY the list.\n'
-        f'Constraint: Responses must remain relevant to the query. Request: {task}.'
+        f'Output: I want you to supply me with {max_iterations} search engine queries I should use to find mind-blowing facts and statistics about a topic of interest.\n'
+        f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].\n'
+        f'The response should contain ONLY the list. Use Google search operators to optimize the search.\n'
+        f'Constraint: Responses must remain relevant to the query.'
+        f'Topic: {task}.'
 
-        # f'Write {max_iterations} google search queries to search online that form an objective opinion from the following task: "{task}"'
-        # f'Use the current date if needed: {datetime.now().strftime("%B %d, %Y")}.\n'
-        # f"Also include in the queries specified task details such as locations, names, etc.\n"
-        # f'You must respond with a list of strings in the following format: ["query 1", "query 2", "query 3"].\n'
-        # f"The response should contain ONLY the list."
+
     )
 
 
@@ -133,16 +159,20 @@ def generate_resource_report_prompt(
         """
 
     return (
-        f'"""{context}"""\n\nBased on the above information, generate a bibliography recommendation report for the following'
-        f' question or topic: "{question}". The report should provide a detailed analysis of each recommended resource,'
-        " explaining how each source can contribute to finding answers to the research question.\n"
-        "Focus on the relevance, reliability, and significance of each source.\n"
-        "Ensure that the report is well-structured, informative, in-depth, and follows Markdown syntax.\n"
-        "Include relevant facts, figures, and numbers whenever available.\n"
-        f"The report should have a minimum length of {total_words} words.\n"
-        "You MUST include all relevant source urls."
-        "Every url should be hyperlinked: [url website](url)"
+        f'"""{context}"""\n\nUsing the above information, act as a Pulitzer Prize journalist who works for the New York Times. Your task is to write a {total_words} word report. The report should be factual, engaging, and structured to facilitate easy understanding of the topic. Use a conversational tone to explain key concepts/ ideas. Ensure the content is well-structured, informative, with sections, logical progression and clear transitions between sections.'
+        f'Conclude with a summary. '
+        f' question or topic: "{question}". '
+        f"Where the source information included data and statistics, ensure to reference these to create confidence in the articles accuracy. You should strive to write the report as long as you can using all relevant and necessary information provided. Cite references in APA format. Always include a References section at the end of the article. You must write the report with markdown syntax\n"
+        f"Focus on the relevance, reliability, and significance of each source.\n"
+        f"You MUST determine your own concrete and valid opinion based on the given information. Do NOT deter to general and meaningless conclusions."
+        f"Ensure that the report is well-structured, informative, in-depth, and follows Markdown syntax.\n"
+        f"Include relevant facts, figures, and numbers whenever available.\n"
+        f"The report should have a length of more than {total_words} words.\n"
+        f"You MUST include all relevant source urls."
+        f"Every url should be hyperlinked: [url website](url)"
         f"{reference_prompt}"
+        f"Step 1: Internally you will determine a format for the report you will write for the problem statement, it should be based on the topic - determine the sections and sub sections. The report should be structured in a manner as to answers the problem statement. do not cover topics not requested. Do not output this report format."
+        f"Step 2: Use the report format from the previous step and write the report using the information supplied and the instructions."
     )
 
 

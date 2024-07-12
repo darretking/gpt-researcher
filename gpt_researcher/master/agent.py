@@ -91,6 +91,24 @@ class GPTResearcher:
                 self.websocket,
             )
 
+        # Generate problem statement
+        problem_statement = await get_problem_statement(
+            query=self.query,
+            agent_role_prompt=self.role,
+            cfg=self.cfg,
+            cost_callback=self.add_costs,
+        )
+
+        self.query = problem_statement
+
+        if self.verbose:
+            await stream_output(
+                "logs",
+                f"🔎 '{self.query}'...",
+                self.websocket,
+            )
+
+
         # Generate Agent
         if not (self.agent and self.role):
             self.agent, self.role = await choose_agent(
@@ -206,11 +224,12 @@ class GPTResearcher:
 
     async def __get_context_by_search(self, query, scraped_data: list = []):
         """
-           Generates the context for the research task by searching the query and scraping the results
+       Generates the context for the research task by searching the query and scraping the results
         Returns:
             context: List of context
         """
         context = []
+
         # Generate Sub-Queries including original query
         sub_queries = await get_sub_queries(
             query=query,
@@ -228,7 +247,7 @@ class GPTResearcher:
         if self.verbose:
             await stream_output(
                 "logs",
-                f"🧠 I will conduct my research based on the following queries: {sub_queries}...",
+                f"🧠 I will use the following search queries to identify supporting information: {sub_queries}...",
                 self.websocket,
             )
 

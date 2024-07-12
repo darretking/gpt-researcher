@@ -153,6 +153,7 @@ async def get_sub_queries(
         cfg: Config
         parent_query:
         report_type:
+        problem_statement:
         cost_callback:
 
     Returns:
@@ -171,6 +172,7 @@ async def get_sub_queries(
                     parent_query,
                     report_type,
                     max_iterations=max_research_iterations,
+                    problem_statement=query,
                 ),
             },
         ],
@@ -183,6 +185,46 @@ async def get_sub_queries(
     sub_queries = json_repair.loads(response)
 
     return sub_queries
+
+async def get_problem_statement(
+    query: str,
+    agent_role_prompt: str,
+    cfg,
+    cost_callback: callable = None,
+):
+    """
+    Gets the problem statement
+    Args:
+        query: original query
+        agent_role_prompt: agent role prompt
+        cfg: Config
+        cost_callback:
+
+    Returns:
+        get_problem_statement: Problem statement for the query
+
+    """
+    
+    response = await create_chat_completion(
+        model=cfg.smart_llm_model,
+        messages=[
+            {"role": "system", "content": f"{agent_role_prompt}"},
+            {
+                "role": "user",
+                "content": generate_problem_statement_prompt(
+                    query
+                ),
+            },
+        ],
+        temperature=0,
+        llm_provider=cfg.llm_provider,
+        llm_kwargs=cfg.llm_kwargs,
+        cost_callback=cost_callback,
+    )
+
+    problem_statement = response
+
+    return problem_statement
 
 
 def scrape_urls(urls, cfg=None):
